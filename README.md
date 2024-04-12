@@ -12,19 +12,22 @@ Support for OpenGL 4.3 core profile is required.
 
 ## How to Compile
 Clone the repo:
+
 ```bash
 git clone git://github.com/MisterRooster/ogl-gui-starter.git
-cd ogl-gui-starter 
 ```
 
 Then simply run CMake with your favourite IDE. Tested with Visual Studio 2022,
 no working guarantee for other environments.
 Example commands for VS 2022:
+
 ```bash
+cd ogl-gui-starter 
 mkdir build
 cd build
 cmake -G "Visual Studio 17"..
 ```
+If you are using **Visual Studio Code**, checkout [How to compile with VS Code](docs/compile-instructions-vscode.md).
 
 ## 3rd Party
 
