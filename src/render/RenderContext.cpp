@@ -349,7 +349,7 @@ namespace nhahn
 		ASSERT(_logo_id, "Failed to create logo texture!");
 
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
-		return true;
+		return ret;
 	}
 
 	void UIContext::preRender()
@@ -557,13 +557,13 @@ namespace nhahn
 					_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25) {
 
 					if (is_maximized)
-						glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos), w_ypos + (c_ypos - _cursor_start_ypos));
+						glfwSetWindowPos(window, w_xpos + (int)(c_xpos - _cursor_start_xpos), w_ypos + (int)(c_ypos - _cursor_start_ypos));
 					else
-						glfwSetWindowPos(window, w_xpos + (c_xpos - _cursor_start_xpos - 1), w_ypos + (c_ypos - _cursor_start_ypos - 1));
+						glfwSetWindowPos(window, w_xpos + (int)(c_xpos - _cursor_start_xpos - 1), w_ypos + (int)(c_ypos - _cursor_start_ypos - 1));
 				}
 				if (_cursor_start_xpos >= ((double)_window_xsiz - 15) && _cursor_start_xpos <= ((double)_window_xsiz) &&
 					_cursor_start_ypos >= ((double)_window_ysiz - 15) && _cursor_start_ypos <= ((double)_window_ysiz)) {
-					glfwSetWindowSize(window, _window_xsiz + (c_xpos - _cursor_start_xpos), _window_ysiz + (c_ypos - _cursor_start_ypos));
+					glfwSetWindowSize(window, _window_xsiz + (int)(c_xpos - _cursor_start_xpos), _window_ysiz + (int)(c_ypos - _cursor_start_ypos));
 				}
 			}
 			if (glfwGetMouseButton(window, 0) == GLFW_RELEASE && _window_dragState == 1) {
@@ -601,6 +601,8 @@ namespace nhahn
 		*out_texture = (unsigned int)image_texture;
 		*out_width = image_width;
 		*out_height = image_height;
+
+		return true;
 	}
 
 	void UIContext::setStyleDarkOrange() const

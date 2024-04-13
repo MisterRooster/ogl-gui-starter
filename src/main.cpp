@@ -61,11 +61,8 @@ namespace nhahn
 			splitDockspace();
 		}
 
-		// calculate frames per second
-		renderFPS = (int)(1.0 / dt);
-
 		// render ui elements
-		sceneView->render();
+		sceneView->render(dt);
 		propertyPanel->render();
 		ImGui::ShowDemoWindow();
 	}

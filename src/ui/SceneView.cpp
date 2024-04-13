@@ -116,8 +116,7 @@ namespace nhahn
         // add stats info
         {
             char statsLabel[64];
-            snprintf(statsLabel, sizeof statsLabel, ICON_MDI_SPEEDOMETER " : %i fps",
-                (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
+            snprintf(statsLabel, sizeof statsLabel, ICON_MDI_SPEEDOMETER " : %i fps", _currentFPS);
             ImVec2 labelSize = ImGui::CalcTextSize(statsLabel);
 
             ImGuiWindowFlags statsInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
