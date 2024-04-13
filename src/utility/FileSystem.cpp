@@ -24,6 +24,8 @@
 #	define NHAPP_PLATFORM NHAPP_PLATFORM_LINUX
 #endif
 
+#include "thirdparty/stb_image.h"
+
 
 namespace nhahn
 {
@@ -100,6 +102,17 @@ namespace nhahn
 		return (stat(filepath, &buffer) == 0);
 	}
 
+	void* FileSystem::loadImageFile(const char* filepath, int* w, int* h,
+		int* channels, int desired_channels = 0)
+	{
+		void *texData = stbi_load(filepath, w, h, channels, desired_channels);
+		if (texData == nullptr) {
+			FAIL("Unable to load image '%s', Error: %s\n", filepath, stbi_failure_reason());
+			return NULL;
+		}
+		//stbi_image_free(texData);
+		return texData;
+	}
 }
 
 //--------------------------------------------------------------------------------------------------
