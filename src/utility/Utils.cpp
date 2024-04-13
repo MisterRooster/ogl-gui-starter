@@ -13,6 +13,15 @@
 
 namespace nhahn
 {
+	// http://www.musicdsp.org/showone.php?id=273
+	// fast rand float, using full 32bit precision
+	// takes about 12 seconds for 2 billion calls
+	static int RandSeed = 1;
+	float Utils::Fast_RandFloat()
+	{
+		RandSeed *= 16807;
+		return (float)RandSeed * 4.6566129e-010f;
+	}
 	
 	float Utils::frand()
 	{
@@ -23,6 +32,16 @@ namespace nhahn
 
 		union_hack.i = (seed >> 8) | 0x3F800000;
 		return union_hack.f - 1.0f;
+	}
+	
+	// http://www.rgba.org/articles/sfrand/sfrand.htm
+	static unsigned int mirand = 1;
+	float Utils::sfrand()
+	{
+		unsigned int a;
+		mirand *= 16807;
+		a = (mirand & 0x007fffff) | 0x40000000;
+		return(*((float*)&a) - 3.0f);
 	}
 
 	int Utils::irand()
@@ -83,6 +102,8 @@ namespace nhahn
 				((UINT32)((UINT8*)src)[2] << 16);
 		case 4:
 			return ((UINT32*)src)[0];
+		default:
+			return ((UINT8*)src)[0];
 		}
 	}
 

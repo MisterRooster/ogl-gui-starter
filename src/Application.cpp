@@ -14,10 +14,10 @@
 
 namespace nhahn
 {
-	Application::Application(const std::string& appname) : _dt(0)
+	Application::Application(const std::string& appname, bool customTitlebar) : _dt(0)
 	{
 		DBG("Application", DebugLevel::INFO, "Application start\n");
-		_mainWindow = std::make_shared<Window>(appname.c_str(), 1280, 720);
+		_mainWindow = std::make_shared<Window>(appname.c_str(), 1280, 720, customTitlebar);
 
 		// update input at poll rate (replayer manages own tickrate)
 		addUpdateCallback([&](double dt) { gInput().update(dt); });
@@ -25,6 +25,11 @@ namespace nhahn
 		// Input should recheck gamepad connection every 10s
 		gInput().connectionRecheck(true);
 		gInput().setConnectionRecheckTime(10);
+	}
+
+	Application::~Application()
+	{
+		DBG("Application", DebugLevel::INFO, "Application end\n");
 	}
 
 	void Application::setRenderCallback(std::function<void(double)> func, double tickrate)

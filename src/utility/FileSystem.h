@@ -21,9 +21,13 @@ namespace nhahn
 		static char* readBinaryFile(const char* filepath);
 		static void writeBinaryFile(const char* filepath, char* data, unsigned long size);
 
+		static void* loadImageFile(const char* filepath, int* w, int* h,
+			int* channels, int desired_channels);
+
 		static time_t fileLastChanged(const char* path);
 		static unsigned long fileSize(const char* filepath);
 		static unsigned long fileSize(FILE* fp);
+		static bool fileExists(const char* filepath);
 
 		static std::string getCurrentDirectory();
 		static std::string getModuleDirectory();

@@ -8,9 +8,10 @@ need a gui.
 A few useful helper classes for rendering, file reading/writing etc. are provided.
 
 > **Note**:
-Support for OpenGL 4.3 core profile is required.
+Support for OpenGL 4.4 core profile is required.
 
 ## How to Compile
+
 Clone the repo:
 
 ```bash
@@ -27,6 +28,7 @@ mkdir build
 cd build
 cmake -G "Visual Studio 17"..
 ```
+
 If you are using **Visual Studio Code**, checkout [How to compile with VS Code](docs/compile-instructions-vscode.md).
 
 ## 3rd Party
@@ -49,6 +51,10 @@ uses a slightly altered version compatible with *CMake* named [**glew-cmake**](h
 - dependencies/**glm** → OpenGL vector and matrix math with SIMD
 [https://github.com/g-truc/glm](https://github.com/g-truc/glm) - [*License*](https://github.com/g-truc/glm/blob/47585fde0c49fa77a2bf2fb1d2ead06999fd4b6e/copying.txt)<br>
 uses version 9.9.8 - [*commit (47585fd)*](https://github.com/g-truc/glm/tree/47585fde0c49fa77a2bf2fb1d2ead06999fd4b6e)
+
+- src/thirdparty/**stb_image.h** → Single file image loader
+[https://github.com/nothings/stb](https://github.com/nothings/stb) - [*License*](https://github.com/nothings/stb/blob/5736b15f7ea0ffb08dd38af21067c314d6a3aae9/LICENSE)<br>
+uses version 2.28 - [*commit (5736b15)*](https://github.com/nothings/stb/tree/5736b15f7ea0ffb08dd38af21067c314d6a3aae9)
 
 -----
 Copyright (c) 2022 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
