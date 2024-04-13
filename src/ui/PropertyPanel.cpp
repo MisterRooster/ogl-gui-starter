@@ -8,35 +8,52 @@
 #include "PropertyPanel.h"
 
 #include "imgui.h"
-
+#include "ui/IconFontDefines.h"
 
 namespace nhahn
 {
     void PropertyPanel::render()
     {
-        ImGui::SetNextWindowSize(ImVec2(200, 300), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Properties");
-        if (ImGui::CollapsingHeader("Colors", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::Begin(ICON_MDI_COGS " Properties"))
         {
-            ImGui::Text("Test Text");
+            ImGuiStyle& style = ImGui::GetStyle();
+            float w = ImGui::CalcItemWidth();
+            float spacing = style.ItemInnerSpacing.x;
+
+            ImGui::SeparatorText("Example category:");
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Slider :");
+
+            ImGui::SameLine();
+            ImGui::PushItemWidth(w - spacing * 2.0f);
+            ImGui::Text("Bla blub.");
+            ImGui::PopItemWidth();
+
+            ImGui::NewLine();
+		    ImGui::TextWrapped(
+			    "Burning Effect where particles spawn from a spere and rise up."
+		    );
+		    ImGui::Spacing();
+		    ImGui::NewLine();
+
+            ImGui::SeparatorText("Example category 2:");
+
+            ImGui::SliderFloat("Variable1", &_roughness, 0.0f, 1.0f);
+            ImGui::SliderFloat("Variable2", &_metallic, 0.0f, 1.0f);
+            ImGui::SameLine(); ImGui::HelpMarker("CTRL+click to input value.");
+
+            if (ImGui::CollapsingHeader("Colors", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::ColorEdit4("start color min", (float*)&_color);
+		        ImGui::SameLine(); ImGui::HelpMarker(
+			        "Click on the color square to open a color picker.\n"
+			        "Click and hold to use drag and drop.\n"
+			        "Right-click on the color square to show options.\n"
+			        "CTRL+click on individual component to input value.\n");
+            }
         }
-
-        if (ImGui::CollapsingHeader("Example Material"))
-        {
-            ImGui::ColorPicker3("Color", (float*)&_color, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_DisplayRGB);
-            ImGui::SliderFloat("Roughness", &_roughness, 0.0f, 1.0f);
-            ImGui::SliderFloat("Metallic", &_metallic, 0.0f, 1.0f);
-        }
-
-        if (ImGui::CollapsingHeader("Example Light"))
-        {
-
-            ImGui::Separator();
-            ImGui::Text("Position");
-            ImGui::Separator();
-        }
-
         ImGui::End();
     }
 }
