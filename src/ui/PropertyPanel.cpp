@@ -19,18 +19,17 @@ namespace nhahn
         ImGui::Begin("Properties");
         if (ImGui::CollapsingHeader("Colors", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::SameLine(0, 5.0f);
-            ImGui::Text("Test234");
+            ImGui::Text("Test Text");
         }
 
-        if (ImGui::CollapsingHeader("Material"))
+        if (ImGui::CollapsingHeader("Example Material"))
         {
             ImGui::ColorPicker3("Color", (float*)&_color, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_DisplayRGB);
             ImGui::SliderFloat("Roughness", &_roughness, 0.0f, 1.0f);
             ImGui::SliderFloat("Metallic", &_metallic, 0.0f, 1.0f);
         }
 
-        if (ImGui::CollapsingHeader("Light"))
+        if (ImGui::CollapsingHeader("Example Light"))
         {
 
             ImGui::Separator();

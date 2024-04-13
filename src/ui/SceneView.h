@@ -26,10 +26,11 @@ namespace nhahn
         SceneView(std::shared_ptr<Texture> t);
         ~SceneView();
 
-        void render();
+        void render(double dt);
 
     private:
-        std::unique_ptr<Shader> _quad;
+        int _currentFPS = 0;
+        std::unique_ptr<Shader> _quadProg;
         std::unique_ptr<RenderTarget> _rt;
 
         std::shared_ptr<Texture> _srcD;

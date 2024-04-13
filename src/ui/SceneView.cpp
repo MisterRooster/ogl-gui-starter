@@ -7,23 +7,35 @@
 \*------------------------------------------------------------------------------------------------*/
 #include "SceneView.h"
 
-#include "imgui.h"
+#include <imgui.h>
+
+#include "IconFontDefines.h"
 #include "render/BufferObject.h"
 #include "utility/FileSystem.h"
 #include "utility/Debug.h"
+#include "utility/Utils.h"
+
+#ifndef M_PI
+#   define M_PI 		3.1415926535897932384626433832795f
+#   define M_2_PI 		6.28318530717958647692528676655901f		// PI*2
+#endif
 
 
 namespace nhahn
 {
-    SceneView::SceneView(std::shared_ptr<Texture> t) : _srcD(t), _screenSize(400, 225)
+    SceneView::SceneView(std::shared_ptr<Texture> t)
+        : _srcD(t), _screenSize(400, 225)
     {
         _srcSize = glm::vec2(t->width(), t->height());
+        std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
 
-        //create new render target
+        // global gl stats
+        glEnable(GL_DEPTH_TEST);
+        // create new render target
         _rt = std::make_unique<RenderTarget>();
 
-        std::string path = nhahn::FileSystem::getModuleDirectory() + "shaders/";
-        _quad = std::make_unique<Shader>(path.c_str(), "common.inc", "quad.vert", nullptr, "quad.frag", 1);
+        // gpu progs
+        _quadProg = std::make_unique<Shader>(path.c_str(), "common.inc", "quad.vert", nullptr, "quad.frag", 1);
 
         // create blank buffer object
         BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)(_srcSize.x * _srcSize.y * sizeof(float)*4));
@@ -49,69 +61,92 @@ namespace nhahn
         _screen->copy(data);
         delete[] data;
 
-        DBG("UI", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
+        DBG("SceneView", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
     }
 
     SceneView::~SceneView()
     {
         _screen.reset();
-        _quad.reset();
+        _quadProg.reset();
         _rt.reset();
     }
 
-    void SceneView::render()
+    void SceneView::render(double dt)
     {
+        _currentFPS = (int)std::round(1.0 / dt);
+
         // scene Window
-        ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNavFocus;
+        ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
-        ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
+        //ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
         ImGui::SetNextWindowSize(ImVec2((float)_screenSize.x, (float)_screenSize.y), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Scene view", nullptr, screenflags);
+        ImGui::Begin(ICON_MDI_EYE " Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
+
+        ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+        _screenSize = { viewportPanelSize.x, viewportPanelSize.y };
 
         // get relative mouse position
         ImGuiIO& io = ImGui::GetIO();
         ImVec2 scrPos = ImGui::GetCursorScreenPos();
-        ImVec2 relMousePos = ImVec2((io.MousePos.x - scrPos.x)/_screenSize.x,1.0f-(io.MousePos.y - scrPos.y)/_screenSize.y);
+        ImVec2 relMousePos = ImVec2((io.MousePos.x - scrPos.x) / _screenSize.x, 1.0f - (io.MousePos.y - scrPos.y) / _screenSize.y);
 
-        // Render source textures to screen texture
+        // render source textures to screen texture
         _rt->bind();
         _rt->pushViewport(0, 0, _srcSize.x, _srcSize.y);
         _srcD->bindAny();
         RtAttachment dst = _rt->attachTextureAny(*_screen);
         _rt->selectAttachmentList(1, dst);
-        _quad->bind();
-        _quad->setUniformI("D", _srcD->boundUnit());
-        _quad->setUniformF("mousePos", glm::vec2(relMousePos.x, relMousePos.y));
+        _quadProg->bind();
+        _quadProg->setUniformI("D", _srcD->boundUnit());
+        _quadProg->setUniformF("mousePos", glm::vec2(relMousePos.x, relMousePos.y));
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        _quadProg->unbind();
         _rt->popViewport();
         _rt->unbind();
-
-        ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-        _screenSize = { viewportPanelSize.x, viewportPanelSize.y };
 
         // add rendered texture to ImGUI scene window
         uint64_t textureID = _screen->glName();
         ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ (float)_screenSize.x, (float)_screenSize.y }, ImVec2{0,1}, ImVec2{1,0});
         if (ImGui::IsItemHovered())
             ImGui::SetMouseCursor(7);
-        {
-            // add description hint to corner
-            ImVec2 newPos;
-            const char* btnLabel = "Render example";
-            newPos.x = ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(btnLabel).x - 18.f;
-            ImGui::SameLine();
-            newPos.y = ImGui::GetCursorPosY() + 10.f;
-            ImGui::SetCursorPos(newPos);
 
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.6f, 0.6f, 0.35f));
-            ImGui::Button(btnLabel);
-            ImGui::PopStyleColor(3);
+        // add stats info
+        {
+            char statsLabel[64];
+            snprintf(statsLabel, sizeof statsLabel, ICON_MDI_SPEEDOMETER " : %i fps",
+                (_currentEffect) ? _currentEffect->numAllParticles() : 0, _currentFPS);
+            ImVec2 labelSize = ImGui::CalcTextSize(statsLabel);
+
+            ImGuiWindowFlags statsInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
+                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+            const float statsInfo_margin = 10.0f;
+            const ImVec2 statsInfo_pad = ImVec2(10.0f, 4.0f);
+            
+            ImVec2 statsInfo_size = ImVec2(labelSize.x + statsInfo_pad.x * 2, labelSize.y + statsInfo_pad.y * 2);
+
+            ImGui::SameLine();
+            ImVec2 statsInfo_pos;
+            statsInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - statsInfo_margin;
+            statsInfo_pos.y = ImGui::GetCursorScreenPos().y + statsInfo_margin;
+
+            ImGui::SetNextWindowPos(statsInfo_pos, ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            statsInfo_flags |= ImGuiWindowFlags_NoMove;
+
+            ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, statsInfo_pad);
+
+            if (ImGui::BeginChild("StatsInfo", statsInfo_size, true, statsInfo_flags))
+            {
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), statsLabel);
+            }
+            ImGui::PopStyleVar(2);
+            ImGui::EndChild();
         }
         ImGui::End();
     }
