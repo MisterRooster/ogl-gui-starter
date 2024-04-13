@@ -8,7 +8,7 @@ need a gui.
 A few useful helper classes for rendering, file reading/writing etc. are provided.
 
 > **Note**:
-Support for OpenGL 4.3 core profile is required.
+Support for OpenGL 4.4 core profile is required.
 
 ## How to Compile
 
