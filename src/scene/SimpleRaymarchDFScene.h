@@ -13,19 +13,20 @@
 
 namespace nhahn
 {
-	class DefaultScene : public Scene
+	class SimpleRaymarchDFScene : public Scene
 	{
 	public:
-		DefaultScene(std::string name) : Scene(name) {}
-		virtual ~DefaultScene() {}
+		SimpleRaymarchDFScene(std::string name) : Scene(name) {}
+		virtual ~SimpleRaymarchDFScene() {}
 
 		void initializeScene() override;
 		void destroyScene() override;
 
 		void render(std::shared_ptr<RenderTarget>& rt, glm::uvec2 screenResolution, double dt) override;
+		void renderOverlayUI() override;
 		void renderPropertyUI() override;
 
 	private:
-		std::unique_ptr<Shader> _defaultProg;
+		std::unique_ptr<Shader> _raymarchDFProg;
 	};
 }

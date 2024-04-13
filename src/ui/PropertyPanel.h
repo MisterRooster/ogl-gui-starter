@@ -7,21 +7,34 @@
 \*------------------------------------------------------------------------------------------------*/
 #pragma once
 
+#include <map>
+#include <memory>
+#include <string>
+#include <functional>
 #include "glm/glm.hpp"
 
 
 namespace nhahn
 {
+    class Scene;
+
     class PropertyPanel
     {
+        using MapOfScenes = std::map<std::string, std::shared_ptr<Scene>>;
+
     public:
-        PropertyPanel() {}
+        PropertyPanel();
 
         void render();
+        
+        void addScene(std::string name, std::shared_ptr<Scene> scene);
+        void setSceneSwitchedCallback(std::function<void(std::shared_ptr<Scene>)> func);
+
+    protected:
+        MapOfScenes _scenesMap;
+        std::string _currentSceneKey;
 
     private:
-        glm::vec3 _color = { 1.0f, 0.0f, 0.0f };
-        float _roughness = 0.2f;
-        float _metallic = 0.1f;
+        std::function<void(std::shared_ptr<Scene>)> _sceneSwitchedCB = {};
     };
 }

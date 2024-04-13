@@ -12,6 +12,10 @@
 
 namespace nhahn
 {
+	Scene::Scene(std::string name) : _name(name)
+	{
+	}
+
 	Scene::~Scene()
 	{
 		gSceneManager().unregisterScene(_name);

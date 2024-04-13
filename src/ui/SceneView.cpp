@@ -11,7 +11,7 @@
 
 #include "IconFontDefines.h"
 #include "render/BufferObject.h"
-#include "scene/Scene.h"
+#include "scene/DefaultScene.h"
 #include "utility/FileSystem.h"
 #include "utility/Debug.h"
 #include "utility/Utils.h"
@@ -26,9 +26,6 @@ namespace nhahn
 
         // create new render target
         _rt = std::make_shared<RenderTarget>();
-
-        // default shader program
-        _defaultProg = std::make_unique<Shader>(path.c_str(), "common.inc", "fullScreenQuad.vert", nullptr, "default.frag", 1);
 
         // create blank buffer object
         BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)(_screenResolution.x * _screenResolution.y * sizeof(float)*4));
@@ -51,7 +48,6 @@ namespace nhahn
     {
         // release smart pointers
         _screen.reset();
-        _defaultProg.reset();
         _rt.reset();
     }
 
@@ -79,26 +75,17 @@ namespace nhahn
         ImVec2 scrPos = ImGui::GetCursorScreenPos();
         ImVec2 relMousePos = ImVec2((io.MousePos.x - scrPos.x) / _screenSize.x, 1.0f - (io.MousePos.y - scrPos.y) / _screenSize.y);
 
-        // render current scene or the default scene
-        _rt->bind();
-        _rt->pushViewport(0, 0, _screenResolution.x, _screenResolution.y);
-        RtAttachment dst = _rt->attachTextureAny(*_screen);
-        _rt->selectAttachmentList(1, dst);
-
+        // render current scene
         if (_currentScene)
         {
+            _rt->bind();
+            _rt->pushViewport(0, 0, _screenResolution.x, _screenResolution.y);
+            RtAttachment dst = _rt->attachTextureAny(*_screen);
+            _rt->selectAttachmentList(1, dst);
             _currentScene->render(_rt, _screenSize, dt);
+            _rt->popViewport();
+            _rt->unbind();
         }
-        else
-        {
-            _defaultProg->bind();
-            _defaultProg->setUniformF("mousePos", glm::vec2(relMousePos.x, relMousePos.y));
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-            _defaultProg->unbind();
-        }
-
-        _rt->popViewport();
-        _rt->unbind();
 
         // add rendered texture to ImGUI scene window
         uint64_t textureID = _screen->glName();

@@ -10,6 +10,7 @@
 #include "imgui_internal.h"
 #include "Application.h"
 #include "scene/DefaultScene.h"
+#include "scene/SimpleRaymarchDFScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "ui/IconFontDefines.h"
@@ -25,7 +26,8 @@ namespace nhahn
 
 	std::unique_ptr<SceneView> sceneView;
 	std::unique_ptr<PropertyPanel> propertyPanel;
-	std::shared_ptr<Scene> defaultScene;
+	std::shared_ptr<Scene> defaultScene = nullptr;
+	std::shared_ptr<Scene> raymarchScene = nullptr;
 
 	void splitDockspace()
 	{
@@ -83,10 +85,18 @@ int main()
 		// create ui
 		sceneView = std::make_unique<SceneView>(glm::uvec2(640, 320));
 		propertyPanel = std::make_unique<PropertyPanel>();
+		propertyPanel->setSceneSwitchedCallback([](std::shared_ptr<Scene> scene) {
+			sceneView->setScene(scene);
+		});
 
-		// create scenes
-		defaultScene = SceneManager::createScene<DefaultScene>("raymarchDF");
-		sceneView->setScene(defaultScene);
+		// default scene
+		defaultScene = SceneManager::createScene<DefaultScene>("< empty >");
+		propertyPanel->addScene(defaultScene->getName(), defaultScene);
+
+		// -> CREATE YOUR CUSTOM SCENES HERE
+
+		raymarchScene = SceneManager::createScene<SimpleRaymarchDFScene>("SimpleRaymarchDF");
+		propertyPanel->addScene(raymarchScene->getName(), raymarchScene);
 
 		// run main loop
 		app.run();

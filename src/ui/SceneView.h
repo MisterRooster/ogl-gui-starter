@@ -9,7 +9,6 @@
 
 #include <memory>
 #include "glm/glm.hpp"
-#include "render/Shader.h"
 #include "render/Texture.h"
 #include "render/RenderTarget.h"
 
@@ -17,9 +16,9 @@
 namespace nhahn
 {
     class Texture;
-    class Shader;
     class RenderTarget;
     class Scene;
+    class DefaultScene;
 
     class SceneView
     {
@@ -34,7 +33,6 @@ namespace nhahn
         void showFPSOverlay(bool fps) { _showFPSOverlay = fps; }
 
     private:
-        std::unique_ptr<Shader> _defaultProg;
         std::shared_ptr<RenderTarget> _rt;
 
         std::unique_ptr<Texture> _screen;

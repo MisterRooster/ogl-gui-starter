@@ -22,7 +22,7 @@ namespace nhahn
 	class Scene
 	{
 	public:
-		Scene(std::string name) {}
+		Scene(std::string name);
 		virtual ~Scene();
 
 		std::string getName() { return _name; }
