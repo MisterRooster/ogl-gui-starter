@@ -8,19 +8,20 @@
 #pragma once
 
 #include "FileSystem.h"
+#include <sys/stat.h>
 #include "Debug.h"
 
 // Platform defines
-#define FS2DGPU_PLATFORM_WIN32 1
-#define FS2DGPU_PLATFORM_LINUX 2
-#define FS2DGPU_PLATFORM_OSX 3
+#define NHAPP_PLATFORM_WIN32 1
+#define NHAPP_PLATFORM_LINUX 2
+#define NHAPP_PLATFORM_OSX 3
 
 #if defined( __WIN32__ ) || defined( _WIN32 )
-#	define FS2DGPU_PLATFORM FS2DGPU_PLATFORM_WIN32
+#	define NHAPP_PLATFORM NHAPP_PLATFORM_WIN32
 #elif defined( __APPLE_CC__)
-#	define FS2DGPU_PLATFORM FS2DGPU_PLATFORM_OSX
+#	define NHAPP_PLATFORM NHAPP_PLATFORM_OSX
 #else
-#	define FS2DGPU_PLATFORM FS2DGPU_PLATFORM_LINUX
+#	define NHAPP_PLATFORM NHAPP_PLATFORM_LINUX
 #endif
 
 
@@ -93,6 +94,24 @@ namespace nhahn
 		return size;
 	}
 
+	bool FileSystem::fileExists(const char* filepath)
+	{
+		struct stat buffer;
+		return (stat(filepath, &buffer) == 0);
+	}
+
+}
+
+//--------------------------------------------------------------------------------------------------
+
+#if NHAPP_PLATFORM == NHAPP_PLATFORM_WIN32
+#include <windows.h>
+#include <tchar.h>
+#include <strsafe.h>
+
+
+namespace nhahn
+{
 	unsigned long FileSystem::fileSize(FILE* fp)
 	{
 		unsigned long prev = ftell(fp);
@@ -102,18 +121,7 @@ namespace nhahn
 
 		return size;
 	}
-}
 
-//--------------------------------------------------------------------------------------------------
-
-#if FS2DGPU_PLATFORM == FS2DGPU_PLATFORM_WIN32
-#include <windows.h>
-#include <tchar.h>
-#include <strsafe.h>
-
-
-namespace nhahn
-{
 	time_t FileSystem::fileLastChanged(const char* path)
 	{
 		HANDLE hFile;
@@ -201,11 +209,12 @@ namespace nhahn
 
 //--------------------------------------------------------------------------------------------------
 
-#elif FS2DGPU_PLATFORM == FS2DGPU_PLATFORM_LINUX
+#elif NHAPP_PLATFORM == NHAPP_PLATFORM_LINUX
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <ctime>
+
 
 namespace nhahn
 {
@@ -222,6 +231,14 @@ namespace nhahn
 	#else
 		return stat.st_mtimespec.tv_sec;
 	#endif
+	}
+
+	time_t FileSystem::fileLastChanged(const char* path)
+	{
+		struct stat attr;
+		stat(path, &attr);
+		std::tm time = *std::localtime(&(attrib.st_ctime));
+		return mktime(&tm);
 	}
 
 	std::string FileSystem::getCurrentDirectory()
