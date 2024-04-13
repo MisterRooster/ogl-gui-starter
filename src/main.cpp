@@ -9,6 +9,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "Application.h"
+#include "scene/DefaultScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "ui/IconFontDefines.h"
@@ -24,7 +25,7 @@ namespace nhahn
 
 	std::unique_ptr<SceneView> sceneView;
 	std::unique_ptr<PropertyPanel> propertyPanel;
-	std::shared_ptr<Texture> displayTex;
+	std::shared_ptr<Scene> defaultScene;
 
 	void splitDockspace()
 	{
@@ -64,7 +65,7 @@ namespace nhahn
 		// render ui elements
 		sceneView->render(dt);
 		propertyPanel->render();
-		ImGui::ShowDemoWindow();
+		// ImGui::ShowDemoWindow(); //<- activate for overview of imgui functionality
 	}
 }
 
@@ -75,19 +76,23 @@ int main()
 	using namespace nhahn;
 
 	{
+		// create application with render loop
 		Application app("OpenGL GUI starter project", true /* with custom titlebar */);
 		app.setRenderCallback(render, renderTickrate);
-
-		displayTex = std::make_shared<Texture>(TextureType::TEXTURE_2D, 640, 320);
-		sceneView = std::make_unique<SceneView>(displayTex);
+		
+		// create ui
+		sceneView = std::make_unique<SceneView>(glm::uvec2(640, 320));
 		propertyPanel = std::make_unique<PropertyPanel>();
+
+		// create scenes
+		defaultScene = SceneManager::createScene<DefaultScene>("raymarchDF");
+		sceneView->setScene(defaultScene);
 
 		// run main loop
 		app.run();
 
 		propertyPanel.reset();
 		sceneView.reset();
-		displayTex.reset();
 	}
 
 	exit(EXIT_SUCCESS);

@@ -19,23 +19,31 @@ namespace nhahn
     class Texture;
     class Shader;
     class RenderTarget;
+    class Scene;
 
     class SceneView
     {
     public:
-        SceneView(std::shared_ptr<Texture> t);
+        SceneView(glm::uvec2 resolution);
         ~SceneView();
 
         void render(double dt);
 
-    private:
-        int _currentFPS = 0;
-        std::unique_ptr<Shader> _quadProg;
-        std::unique_ptr<RenderTarget> _rt;
+        void setScene(std::shared_ptr<Scene> scene) { _currentScene = scene; }
+        
+        void showFPSOverlay(bool fps) { _showFPSOverlay = fps; }
 
-        std::shared_ptr<Texture> _srcD;
+    private:
+        std::unique_ptr<Shader> _defaultProg;
+        std::shared_ptr<RenderTarget> _rt;
+
         std::unique_ptr<Texture> _screen;
-        glm::uvec2 _srcSize;
+        glm::uvec2 _screenResolution;
         glm::uvec2 _screenSize;
+
+        std::shared_ptr<Scene> _currentScene = nullptr;
+
+        int _currentFPS = 0;
+        bool _showFPSOverlay = true;
     };
 }

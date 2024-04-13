@@ -11,63 +11,47 @@
 
 #include "IconFontDefines.h"
 #include "render/BufferObject.h"
+#include "scene/Scene.h"
 #include "utility/FileSystem.h"
 #include "utility/Debug.h"
 #include "utility/Utils.h"
 
-#ifndef M_PI
-#   define M_PI 		3.1415926535897932384626433832795f
-#   define M_2_PI 		6.28318530717958647692528676655901f		// PI*2
-#endif
-
 
 namespace nhahn
 {
-    SceneView::SceneView(std::shared_ptr<Texture> t)
-        : _srcD(t), _screenSize(400, 225)
+    SceneView::SceneView(glm::uvec2 resolution)
+        : _screenResolution(resolution), _screenSize(400, 225)
     {
-        _srcSize = glm::vec2(t->width(), t->height());
         std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
 
-        // global gl stats
-        glEnable(GL_DEPTH_TEST);
         // create new render target
-        _rt = std::make_unique<RenderTarget>();
+        _rt = std::make_shared<RenderTarget>();
 
-        // gpu progs
-        _quadProg = std::make_unique<Shader>(path.c_str(), "common.inc", "quad.vert", nullptr, "quad.frag", 1);
+        // default shader program
+        _defaultProg = std::make_unique<Shader>(path.c_str(), "common.inc", "fullScreenQuad.vert", nullptr, "default.frag", 1);
 
         // create blank buffer object
-        BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)(_srcSize.x * _srcSize.y * sizeof(float)*4));
+        BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)(_screenResolution.x * _screenResolution.y * sizeof(float)*4));
         blackPbo->bind();
         blackPbo->map();
-        memset(blackPbo->data(), 0, _srcSize.x * _srcSize.y * sizeof(float) * 4);
+        memset(blackPbo->data(), 0, _screenResolution.x * _screenResolution.y * sizeof(float) * 4);
         blackPbo->unmap();
         blackPbo->unbind();
 
-        _screen = std::make_unique<Texture>(TEXTURE_2D, _srcSize.x, _srcSize.y);
+        // create screen texture to render to
+        _screen = std::make_unique<Texture>(TEXTURE_2D, _screenResolution.x, _screenResolution.y);
         _screen->setFormat(TEXEL_FLOAT, 4, 4);
         _screen->init();
         _screen->copyPbo(*blackPbo);
-
-        float* data = new float[_srcSize.x * _srcSize.y * 4];
-        for (unsigned int y = 0, idx = 0; y < _srcSize.y; y++) {
-            for (unsigned int x = 0; x < _srcSize.x; x++, idx++) {
-                data[idx] = 0.5f;
-                if (x == _srcSize.x - 1 || y == _srcSize.y - 1)
-                    data[idx] = 0.0f;
-            }
-        }
-        _screen->copy(data);
-        delete[] data;
 
         DBG("SceneView", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
     }
 
     SceneView::~SceneView()
     {
+        // release smart pointers
         _screen.reset();
-        _quadProg.reset();
+        _defaultProg.reset();
         _rt.reset();
     }
 
@@ -80,11 +64,13 @@ namespace nhahn
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
-        //ImGui::SetNextWindowPos(ImGui::GetCursorScreenPos(), ImGuiCond_Once);
+
+        // set initial window size on first use
         ImGui::SetNextWindowSize(ImVec2((float)_screenSize.x, (float)_screenSize.y), ImGuiCond_FirstUseEver);
         ImGui::Begin(ICON_MDI_EYE " Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
+        // set screensize to viewport size
         ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
         _screenSize = { viewportPanelSize.x, viewportPanelSize.y };
 
@@ -93,17 +79,24 @@ namespace nhahn
         ImVec2 scrPos = ImGui::GetCursorScreenPos();
         ImVec2 relMousePos = ImVec2((io.MousePos.x - scrPos.x) / _screenSize.x, 1.0f - (io.MousePos.y - scrPos.y) / _screenSize.y);
 
-        // render source textures to screen texture
+        // render current scene or the default scene
         _rt->bind();
-        _rt->pushViewport(0, 0, _srcSize.x, _srcSize.y);
-        _srcD->bindAny();
+        _rt->pushViewport(0, 0, _screenResolution.x, _screenResolution.y);
         RtAttachment dst = _rt->attachTextureAny(*_screen);
         _rt->selectAttachmentList(1, dst);
-        _quadProg->bind();
-        _quadProg->setUniformI("D", _srcD->boundUnit());
-        _quadProg->setUniformF("mousePos", glm::vec2(relMousePos.x, relMousePos.y));
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        _quadProg->unbind();
+
+        if (_currentScene)
+        {
+            _currentScene->render(_rt, _screenSize, dt);
+        }
+        else
+        {
+            _defaultProg->bind();
+            _defaultProg->setUniformF("mousePos", glm::vec2(relMousePos.x, relMousePos.y));
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            _defaultProg->unbind();
+        }
+
         _rt->popViewport();
         _rt->unbind();
 
@@ -113,7 +106,8 @@ namespace nhahn
         if (ImGui::IsItemHovered())
             ImGui::SetMouseCursor(7);
 
-        // add stats info
+        // add fps counter overlay
+        if (_showFPSOverlay)
         {
             char statsLabel[64];
             snprintf(statsLabel, sizeof statsLabel, ICON_MDI_SPEEDOMETER " : %i fps", _currentFPS);
@@ -125,7 +119,7 @@ namespace nhahn
 
             const float statsInfo_margin = 10.0f;
             const ImVec2 statsInfo_pad = ImVec2(10.0f, 4.0f);
-            
+
             ImVec2 statsInfo_size = ImVec2(labelSize.x + statsInfo_pad.x * 2, labelSize.y + statsInfo_pad.y * 2);
 
             ImGui::SameLine();
@@ -147,6 +141,13 @@ namespace nhahn
             ImGui::PopStyleVar(2);
             ImGui::EndChild();
         }
+
+        // additional scene ui overlays
+        if (_currentScene)
+        {
+            _currentScene->renderOverlayUI();
+        }
+
         ImGui::End();
     }
 }

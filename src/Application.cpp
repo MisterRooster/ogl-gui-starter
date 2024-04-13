@@ -19,7 +19,7 @@ namespace nhahn
 		DBG("Application", DebugLevel::INFO, "Application start\n");
 		_mainWindow = std::make_shared<Window>(appname.c_str(), 1280, 720, customTitlebar);
 
-		// update input at poll rate (replayer manages own tickrate)
+		// update input at poll rate (input manages own tickrate)
 		addUpdateCallback([&](double dt) { gInput().update(dt); });
 
 		// Input should recheck gamepad connection every 10s
