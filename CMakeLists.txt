@@ -63,7 +63,7 @@ endif()
 #endif()
 
 #######################################
-# External libraries!
+# External libraries
 #######################################
 
 # OpenGL
