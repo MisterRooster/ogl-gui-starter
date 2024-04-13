@@ -9,6 +9,7 @@
 
 #include "imgui.h"
 #include "ui/IconFontDefines.h"
+#include "ui/CustomWidgets.h"
 
 namespace nhahn
 {
@@ -21,32 +22,31 @@ namespace nhahn
             float w = ImGui::CalcItemWidth();
             float spacing = style.ItemInnerSpacing.x;
 
-            ImGui::SeparatorText("Example category:");
-
             ImGui::AlignTextToFramePadding();
-            ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Slider :");
-
-            ImGui::SameLine();
-            ImGui::PushItemWidth(w - spacing * 2.0f);
-            ImGui::Text("Bla blub.");
-            ImGui::PopItemWidth();
-
             ImGui::NewLine();
-		    ImGui::TextWrapped(
-			    "Burning Effect where particles spawn from a spere and rise up."
+            ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Tip: ");
+            ImGui::TextWrapped(
+			    "Remove the Demo window by uncommenting the IMGUI_DISABLE_DEMO_WINDOWS macro in "
+                "the file thirdparty/oglp_imgui_config.h"
 		    );
-		    ImGui::Spacing();
+            ImGui::Spacing();
 		    ImGui::NewLine();
 
-            ImGui::SeparatorText("Example category 2:");
+            ImGui::SeparatorText("Example category 1:");
+            ImGui::NewLine();
 
             ImGui::SliderFloat("Variable1", &_roughness, 0.0f, 1.0f);
+            ImGui::SameLine(); ImGui::HelpMarker("CTRL+click to input value.");
             ImGui::SliderFloat("Variable2", &_metallic, 0.0f, 1.0f);
             ImGui::SameLine(); ImGui::HelpMarker("CTRL+click to input value.");
 
-            if (ImGui::CollapsingHeader("Colors", ImGuiTreeNodeFlags_DefaultOpen))
+            ImGui::NewLine();
+            ImGui::SeparatorText("Example category 2:");
+            ImGui::NewLine();
+
+            if (ImGui::CollapsingHeader("Collapsing Header", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::ColorEdit4("start color min", (float*)&_color);
+                ImGui::ColorEdit4("color var", (float*)&_color);
 		        ImGui::SameLine(); ImGui::HelpMarker(
 			        "Click on the color square to open a color picker.\n"
 			        "Click and hold to use drag and drop.\n"
