@@ -9,7 +9,7 @@
 
 #include "scene/Scene.h"
 #include "render/Shader.h"
-
+#include <glm/glm.hpp>
 
 namespace nhahn
 {
@@ -28,5 +28,8 @@ namespace nhahn
 
 	private:
 		std::unique_ptr<Shader> _raymarchDFProg;
+
+		double _timeSinceStart = 0;
+		glm::vec2 mouseUnif = glm::vec2(0);
 	};
 }

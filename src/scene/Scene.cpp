@@ -39,12 +39,12 @@ namespace nhahn
 
 	std::shared_ptr<Scene> SceneManager::getScene(std::string name)
 	{
-		SceneManager& gSceneManager = instance();
+		SceneManager& sceneManager = instance();
 
-		if (auto search = gSceneManager._scenes.find(name);
-			search != gSceneManager._scenes.end())
+		if (auto search = sceneManager._scenes.find(name);
+			search != sceneManager._scenes.end())
 		{
-			return gSceneManager._scenes.at(name);
+			return sceneManager._scenes.at(name);
 		}
 
 		return nullptr;
@@ -52,24 +52,24 @@ namespace nhahn
 
 	bool SceneManager::registerScene(std::shared_ptr<Scene> scene)
 	{
-		SceneManager& gSceneManager = instance();
+		SceneManager& sceneManager = instance();
 
 		if (!scene) return false;
-		if (auto search = gSceneManager._scenes.find(scene->getName());
-			search != gSceneManager._scenes.end()) return false;
+		if (auto search = sceneManager._scenes.find(scene->getName());
+			search != sceneManager._scenes.end()) return false;
 
-		gSceneManager._scenes.insert(std::pair<std::string, std::shared_ptr<Scene>>(scene->getName(), scene));
+		sceneManager._scenes.insert(std::pair<std::string, std::shared_ptr<Scene>>(scene->getName(), scene));
 		return true;
 	}
 
 	bool SceneManager::unregisterScene(std::string name)
 	{
-		SceneManager& gSceneManager = instance();
+		SceneManager& sceneManager = instance();
 
-		if (auto search = gSceneManager._scenes.find(name); search == gSceneManager._scenes.end())
+		if (auto search = sceneManager._scenes.find(name); search == sceneManager._scenes.end())
 		{
 			search->second->destroyScene();
-			gSceneManager._scenes.erase(search);
+			sceneManager._scenes.erase(search);
 			return true;
 		}
 

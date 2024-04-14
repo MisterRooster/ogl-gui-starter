@@ -20,6 +20,7 @@ namespace nhahn
         std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
 
         _raymarchDFProg = std::make_unique<Shader>(path.c_str(), "common.inc", "fullScreenQuad.vert", nullptr, "raymarchDF.frag", 1);
+        _timeSinceStart = 0.0;
     }
 
     void SimpleRaymarchDFScene::destroyScene()
@@ -29,16 +30,21 @@ namespace nhahn
 
     void SimpleRaymarchDFScene::render(std::shared_ptr<RenderTarget>& rt, glm::uvec2 screenSize, double dt)
     {
+        _timeSinceStart += dt; 
+        
         // get relative mouse position
         ImGuiIO& io = ImGui::GetIO();
-        ImVec2 scrPos = ImGui::GetCursorScreenPos();
+        ImVec2 scrPos = ImGui::GetCursorScreenPos(); 
         ImVec2 relMousePos = ImVec2((io.MousePos.x - scrPos.x) / screenSize.x, 1.0f - (io.MousePos.y - scrPos.y) / screenSize.y);
-
+        if (io.MouseDown[0] && abs(relMousePos.x-.5)<.5 && abs(relMousePos.y-.5)<.5)
+        {
+            mouseUnif = glm::vec2(relMousePos.x, relMousePos.y);
+        }
+        
         _raymarchDFProg->bind();
-        //_raymarchDFProg->setUniformMat("modelViewMat", _cam->getViewMatrix(), false);
-        //_raymarchDFProg->setUniformMat("projectionMat", projMat, false);
-
-        _raymarchDFProg->setUniformF("mousePos", glm::vec2(relMousePos.x, relMousePos.y));
+        _raymarchDFProg->setUniformF("mousePos", mouseUnif);
+        _raymarchDFProg->setUniformF("resolution", glm::vec3(screenSize.x, screenSize.y, 1.0f));
+        _raymarchDFProg->setUniformF("time", (float)_timeSinceStart);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         _raymarchDFProg->unbind();
     }

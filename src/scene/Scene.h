@@ -64,10 +64,10 @@ namespace nhahn
 	template<typename T>
 	static std::shared_ptr<Scene> SceneManager::createScene(std::string name)
 	{
-		SceneManager& gSceneManager = instance();
+		SceneManager& sceneManager = instance();
 
-		if (auto search = gSceneManager._scenes.find(name);
-			search != gSceneManager._scenes.end())
+		if (auto search = sceneManager._scenes.find(name);
+			search != sceneManager._scenes.end())
 		{
 			DBG("SceneManager", DebugLevel::WARNING, "Scene with name %s already exists!\n");
 			return nullptr;
@@ -75,7 +75,7 @@ namespace nhahn
 
 		std::shared_ptr<Scene> scene = std::make_shared<T>(name);
 		scene->initializeScene();
-		gSceneManager._scenes.insert(std::pair<std::string, std::shared_ptr<Scene>>(name, scene));
+		sceneManager._scenes.insert(std::pair<std::string, std::shared_ptr<Scene>>(name, scene));
 
 		return scene;
 	}
