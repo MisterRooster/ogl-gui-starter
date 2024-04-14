@@ -2,10 +2,9 @@
 
 # ogl-gui-starter
 
-This application is a simple OpenGL window using GLFW3 with imgui embedded as graphical user interface.
-It's purpose is to be used as a starting point for OpenGL projects that
-need a gui.
-A few useful helper classes for rendering, file reading/writing etc. are provided.
+This project is a small OpenGL application using GLFW3 with imgui embedded as graphical user interface.
+It's purpose is to be used as a basis to quickly prototyping and implementing OpenGL scenarios or as a starting point for your own gui OpenGL application.
+Same useful helper classes for rendering, file reading/writing etc. are provided.
 
 > **Note**:
 Support for OpenGL 4.4 core profile is required.
@@ -56,6 +55,18 @@ uses version 9.9.8 - [*commit (47585fd)*](https://github.com/g-truc/glm/tree/475
 [https://github.com/nothings/stb](https://github.com/nothings/stb) - [*License*](https://github.com/nothings/stb/blob/5736b15f7ea0ffb08dd38af21067c314d6a3aae9/LICENSE)<br>
 uses version 2.28 - [*commit (5736b15)*](https://github.com/nothings/stb/tree/5736b15f7ea0ffb08dd38af21067c314d6a3aae9)
 
+The following resources are used:
+
+ - data/**icons** → Application icon made by [@Smashicons](https://www.flaticon.com/authors/smashicons) on
+ [Flaticon](https://www.flaticon.com/)<br>
+ [https://www.flaticon.com/free-icon/cock_2490630](https://www.flaticon.com/free-icon/cock_2490630)
+
+- data/**fonts** → Regular Font and Icon Font by Microsoft and [Pictogrammers](https://pictogrammers.com/) <br>
+[**Ubuntu-Regular.ttf**](https://fonts.google.com/specimen/Ubuntu) - [*License*](https://ubuntu.com/legal/font-licence), 
+[**MaterialDesignIconsDesktop.ttf**](https://github.com/Templarian/MaterialDesign-Font) - [*License*](https://pictogrammers.com/docs/general/license/)
+
+- src/shaders/**volumetricStanford.frag** → Altered shader based on Volumetric Stanford Bunny 2 made by [@FabriceNeyrat2](https://www.shadertoy.com/user/FabriceNeyret2) on [Shadertoy](https://www.shadertoy.com/)<br>
+[https://www.shadertoy.com/view/ls2BRt](https://www.shadertoy.com/view/ls2BRt)
 -----
 Copyright (c) 2022 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
 Licensed under the MIT license. See [LICENSE](LICENSE) for full terms.
