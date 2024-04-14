@@ -13,11 +13,11 @@
 
 namespace nhahn
 {
-	class SimpleRaymarchDFScene : public Scene
+	class VolumetricStanfordScene : public Scene
 	{
 	public:
-		SimpleRaymarchDFScene(std::string name) : Scene(name) {}
-		virtual ~SimpleRaymarchDFScene() {}
+		VolumetricStanfordScene(std::string name) : Scene(name) {}
+		virtual ~VolumetricStanfordScene() {}
 
 		void initializeScene() override;
 		void destroyScene() override;
@@ -27,7 +27,7 @@ namespace nhahn
 		void renderPropertyUI() override;
 
 	private:
-		std::unique_ptr<Shader> _raymarchDFProg;
+		std::unique_ptr<Shader> _volumetricStanfordProg;
 
 		double _timeSinceStart = 0;
 		glm::vec2 mouseUnif = glm::vec2(0);

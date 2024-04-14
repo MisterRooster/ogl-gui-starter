@@ -5,7 +5,7 @@
 | Licensed under the MIT license. See LICENSE file for full terms.
 | This notice is not to be removed.
 \*------------------------------------------------------------------------------------------------*/
-#include "SimpleRaymarchDFScene.h"
+#include "VolumetricStanfordScene.h"
 
 #include "ui/IconFontDefines.h"
 #include "render/RenderTarget.h"
@@ -15,20 +15,20 @@
 
 namespace nhahn
 {
-    void SimpleRaymarchDFScene::initializeScene()
+    void VolumetricStanfordScene::initializeScene()
     {
         std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
 
-        _raymarchDFProg = std::make_unique<Shader>(path.c_str(), "common.inc", "fullScreenQuad.vert", nullptr, "raymarchDF.frag", 1);
+        _volumetricStanfordProg = std::make_unique<Shader>(path.c_str(), "common.inc", "fullScreenQuad.vert", nullptr, "volumetricStanford.frag", 1);
         _timeSinceStart = 0.0;
     }
 
-    void SimpleRaymarchDFScene::destroyScene()
+    void VolumetricStanfordScene::destroyScene()
     {
-        _raymarchDFProg.reset();
+        _volumetricStanfordProg.reset();
     }
 
-    void SimpleRaymarchDFScene::render(std::shared_ptr<RenderTarget>& rt, glm::uvec2 screenSize, double dt)
+    void VolumetricStanfordScene::render(std::shared_ptr<RenderTarget>& rt, glm::uvec2 screenSize, double dt)
     {
         _timeSinceStart += dt; 
         
@@ -41,15 +41,15 @@ namespace nhahn
             mouseUnif = glm::vec2(relMousePos.x, relMousePos.y);
         }
         
-        _raymarchDFProg->bind();
-        _raymarchDFProg->setUniformF("mousePos", mouseUnif);
-        _raymarchDFProg->setUniformF("resolution", glm::vec3(screenSize.x, screenSize.y, 1.0f));
-        _raymarchDFProg->setUniformF("time", (float)_timeSinceStart);
+        _volumetricStanfordProg->bind();
+        _volumetricStanfordProg->setUniformF("mousePos", mouseUnif);
+        _volumetricStanfordProg->setUniformF("resolution", glm::vec3(screenSize.x, screenSize.y, 1.0f));
+        _volumetricStanfordProg->setUniformF("time", (float)_timeSinceStart);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        _raymarchDFProg->unbind();
+        _volumetricStanfordProg->unbind();
     }
 
-    void SimpleRaymarchDFScene::renderOverlayUI()
+    void VolumetricStanfordScene::renderOverlayUI()
     {
         Scene::renderOverlayUI();
 
@@ -95,7 +95,7 @@ namespace nhahn
         }
     }
 
-    void SimpleRaymarchDFScene::renderPropertyUI()
+    void VolumetricStanfordScene::renderPropertyUI()
     {
         Scene::renderPropertyUI();
     }

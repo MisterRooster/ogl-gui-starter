@@ -10,7 +10,7 @@
 #include "imgui_internal.h"
 #include "Application.h"
 #include "scene/DefaultScene.h"
-#include "scene/SimpleRaymarchDFScene.h"
+#include "scene/VolumetricStanfordScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "ui/IconFontDefines.h"
@@ -95,7 +95,7 @@ int main()
 
 		// -> CREATE YOUR CUSTOM SCENES HERE
 
-		raymarchScene = SceneManager::createScene<SimpleRaymarchDFScene>("SimpleRaymarchDF");
+		raymarchScene = SceneManager::createScene<VolumetricStanfordScene>("VolumetricBunny");
 		propertyPanel->addScene(raymarchScene->getName(), raymarchScene);
 
 		// run main loop
