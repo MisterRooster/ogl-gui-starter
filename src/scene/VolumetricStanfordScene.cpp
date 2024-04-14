@@ -45,6 +45,7 @@ namespace nhahn
         _volumetricStanfordProg->setUniformF("mousePos", mouseUnif);
         _volumetricStanfordProg->setUniformF("resolution", glm::vec3(screenSize.x, screenSize.y, 1.0f));
         _volumetricStanfordProg->setUniformF("time", (float)_timeSinceStart);
+        _volumetricStanfordProg->setUniformI("softenEdges", _softenEdges);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         _volumetricStanfordProg->unbind();
     }
@@ -56,9 +57,7 @@ namespace nhahn
         // add input info
         {
             const char* inputlabel1 = "[" ICON_MDI_MOUSE "LMB + " ICON_MDI_ARROW_ALL "] " ICON_MDI_ARROW_RIGHT_THIN " Turn Camera";
-            const char* inputlabel2 = "[" ICON_MDI_MOUSE "RMB + " ICON_MDI_ARROW_UP_DOWN "] " ICON_MDI_ARROW_RIGHT_THIN " Zoom in / out";
             ImVec2 labelSize1 = ImGui::CalcTextSize(inputlabel1);
-            ImVec2 labelSize2 = ImGui::CalcTextSize(inputlabel2);
 
             ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
                 | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
@@ -67,8 +66,8 @@ namespace nhahn
             const float inputInfo_margin = 10.0f;
             const ImVec2 inputInfo_pad = ImVec2(10.0f, 4.0f);
 
-            ImVec2 inputInfo_size = ImVec2(std::max(labelSize1.x, labelSize2.x) + inputInfo_pad.x * 2,
-                labelSize1.y + labelSize2.y + inputInfo_pad.y * 2 + 9.0f);
+            ImVec2 inputInfo_size = ImVec2(labelSize1.x + inputInfo_pad.x * 2,
+                labelSize1.y  + inputInfo_pad.y * 2);
 
             ImVec2 inputInfo_pos;
             inputInfo_pos.x = ImGui::GetWindowPos().x + ImGui::GetWindowWidth() - inputInfo_margin;
@@ -81,14 +80,9 @@ namespace nhahn
 
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, inputInfo_pad);
-
             if (ImGui::BeginChild("InputInfo", inputInfo_size, true, inputInfo_flags))
             {
                 ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel1);
-                ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.06f, 0.06f, 0.06f, 1.0f));
-                ImGui::Separator();
-                ImGui::PopStyleColor(1);
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel2);
             }
             ImGui::PopStyleVar(2);
             ImGui::EndChild();
@@ -97,6 +91,23 @@ namespace nhahn
 
     void VolumetricStanfordScene::renderPropertyUI()
     {
-        Scene::renderPropertyUI();
+        ImGui::SeparatorText("Description:");
+        ImGui::TextWrapped(
+            "This Scene renders a 32x32x32 volumetric Stanford Bunny."
+            "The data is packed in a voxel density buffer and the whole scene is rendered on "
+            "a quad from a fragment shader.\n\n"
+            "This shader is converted from Shadertoy.com. All credits belong to the original author."
+        );
+        ImGui::NewLine();
+        ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Shadertoy link : ");
+        ImGui::SameLine(); ImGui::Text("https://www.shadertoy.com/view/ls2BRt");
+        ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Author : ");
+        ImGui::SameLine(); ImGui::Text("FabriceNeyrat2");
+        ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), "Date : ");
+        ImGui::SameLine(); ImGui::Text("2017-08-03");
+        ImGui::NewLine();
+
+        ImGui::SeparatorText("Settings:");
+        ImGui::Checkbox("Soft Edges", &_softenEdges);
     }
 }

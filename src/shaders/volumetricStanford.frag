@@ -3,6 +3,7 @@
 uniform vec2 mousePos;
 uniform vec3 resolution;
 uniform float time;
+uniform bool softenEdges;
 
 in vec2 vCoord;
 out vec4 FragColor0;
@@ -31,8 +32,6 @@ void main()
 	vec2 U = vCoord * R;
 	U = 1.7* ( (U+U - R) / R.y);
 	FragColor0 -= FragColor0;
-	//if (abs(M.x-.5f)>0.48f && abs(M.y-.5f)>0.48f) M = vec2(-time,.78);
-	//M = length(M) < 20. ? vec2(-time,.78) : -1.57*(2.*M-R)/R.y;
 	M = (abs(M.x-.5f)>0.48f || abs(M.y-.5f)>0.48f) ? vec2(-time,.78) : -1.57*(2.*M*R-R)/R.y;
 
 	for (float i=-1.4; i<1.; i+=.3/16.) { // step .3 for Nyquist
@@ -42,6 +41,7 @@ void main()
 		vec3 A = abs(P); if (max(A.x,max(A.y,A.z))>1.) continue; // optimization
 		P = 16.*(P+1.);
 		
-		FragColor0 += (1.-FragColor0.a) * voxel( P.x , P.z , P.y ) * vec4( vec3(.5-.5*i), 1) ;
+		float V = softenEdges ? voxel( P.x , P.z , P.y ) : voxelB( P.x , P.z , P.y );
+		FragColor0 += (1.-FragColor0.a) * V * vec4( vec3(.5-.5*i), 1) ;
 	}
 }

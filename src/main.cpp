@@ -93,10 +93,11 @@ int main()
 		defaultScene = SceneManager::createScene<DefaultScene>("< empty >");
 		propertyPanel->addScene(defaultScene->getName(), defaultScene);
 
-		// -> CREATE YOUR CUSTOM SCENES HERE
-
+		// volumetric example scene
 		raymarchScene = SceneManager::createScene<VolumetricStanfordScene>("VolumetricBunny");
 		propertyPanel->addScene(raymarchScene->getName(), raymarchScene);
+
+		// -> CREATE YOUR CUSTOM SCENES HERE
 
 		// run main loop
 		app.run();

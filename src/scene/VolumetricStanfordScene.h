@@ -31,5 +31,7 @@ namespace nhahn
 
 		double _timeSinceStart = 0;
 		glm::vec2 mouseUnif = glm::vec2(0);
+
+		bool _softenEdges = true;
 	};
 }
