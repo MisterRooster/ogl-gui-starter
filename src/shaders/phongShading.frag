@@ -11,7 +11,7 @@ void main()
 {
     vec3 viewPos = vec3(0.0f, 0.0f, 3.0f); 
 
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.3;
     vec3 ambient = ambientStrength * lightColor;
 
     vec3 norm = normalize(Normal);
