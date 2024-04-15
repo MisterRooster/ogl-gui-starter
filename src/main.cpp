@@ -11,6 +11,7 @@
 #include "Application.h"
 #include "scene/DefaultScene.h"
 #include "scene/VolumetricStanfordScene.h"
+#include "scene/SimpleCubeScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "ui/IconFontDefines.h"
@@ -28,6 +29,7 @@ namespace nhahn
 	std::unique_ptr<PropertyPanel> propertyPanel;
 	std::shared_ptr<Scene> defaultScene = nullptr;
 	std::shared_ptr<Scene> raymarchScene = nullptr;
+	std::shared_ptr<Scene> simpleCubeScene = nullptr;
 
 	void splitDockspace()
 	{
@@ -92,6 +94,10 @@ int main()
 		// default scene
 		defaultScene = SceneManager::createScene<DefaultScene>("< empty >");
 		propertyPanel->addScene(defaultScene->getName(), defaultScene);
+
+		// simple cube scene
+		simpleCubeScene = SceneManager::createScene<SimpleCubeScene>("simpleCube");
+		propertyPanel->addScene(simpleCubeScene->getName(), simpleCubeScene);
 
 		// volumetric example scene
 		raymarchScene = SceneManager::createScene<VolumetricStanfordScene>("VolumetricBunny");

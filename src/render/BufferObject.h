@@ -55,7 +55,7 @@ namespace nhahn
         void bindIndexedRange(int index, GLintptr offset, GLsizeiptr size);
         void unbindIndexed(int index);
 
-        void copyData(void* data, GLsizei size, GLenum usage);
+        void copyData(void* data);
 
         GLuint glName() const { return _glName; }
         GLenum type() const { return _type; }

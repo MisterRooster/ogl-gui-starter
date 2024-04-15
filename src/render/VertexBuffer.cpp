@@ -65,7 +65,7 @@ namespace nhahn
                     addAttribute("Normal", 3, GL_FLOAT, 0);
                     break;
                 case VBO_ATT_COLOR:
-                    addAttribute("Color", 4, GL_UNSIGNED_BYTE, 1);
+                    addAttribute("Color", 4, GL_FLOAT, 0);
                     break;
                 case VBO_ATT_TEXCOORD0:
                     addAttribute("TexCoord0", 2, GL_FLOAT, 0);
@@ -133,7 +133,7 @@ namespace nhahn
         ibo.bind();
         mapAttributes(shader);
         enableVertexAttributes();
-        glDrawElements(mode, count ? count : ibo.size() / 2, GL_UNSIGNED_SHORT, NULL);
+        glDrawElements(mode, count ? count : ibo.size() / 2, GL_UNSIGNED_INT, NULL);
         disableVertexAttributes();
         ibo.unbind();
         unbind();

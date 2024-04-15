@@ -120,4 +120,10 @@ namespace nhahn
     {
         glBindBufferBase(_glType, index, 0);
     }
+    void BufferObject::copyData(void* data)
+    {
+        bind();
+        glBufferStorage(_glType, GLsizeiptr(_size), data, 0);
+        unbind();
+    }
 }
