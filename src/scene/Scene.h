@@ -62,7 +62,7 @@ namespace nhahn
 	};
 
 	template<typename T>
-	static std::shared_ptr<Scene> SceneManager::createScene(std::string name)
+	std::shared_ptr<Scene> SceneManager::createScene(std::string name)
 	{
 		SceneManager& sceneManager = instance();
 
