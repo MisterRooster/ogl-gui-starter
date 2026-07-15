@@ -30,11 +30,16 @@ namespace nhahn
         void addScene(std::string name, std::shared_ptr<Scene> scene);
         void setSceneSwitchedCallback(std::function<void(std::shared_ptr<Scene>)> func);
 
+        /** Register a callback that renders global display settings (UI scale, render
+            size, ...) inside the "Display" section at the top of the panel. */
+        void setDisplaySettingsCallback(std::function<void()> func) { _displaySettingsCB = func; }
+
     protected:
         MapOfScenes _scenesMap;
         std::string _currentSceneKey;
 
     private:
         std::function<void(std::shared_ptr<Scene>)> _sceneSwitchedCB = {};
+        std::function<void()> _displaySettingsCB = {};
     };
 }

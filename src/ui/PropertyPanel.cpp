@@ -51,6 +51,14 @@ namespace nhahn
             float w = ImGui::CalcItemWidth();
             float spacing = style.ItemInnerSpacing.x;
 
+            // global display settings (UI scale, render size, ...)
+            if (_displaySettingsCB)
+            {
+                ImGui::SeparatorText("Display:");
+                _displaySettingsCB();
+                ImGui::NewLine();
+            }
+
             ImGui::SeparatorText("Scene:");
 
             ImGui::AlignTextToFramePadding();

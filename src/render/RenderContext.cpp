@@ -14,6 +14,7 @@
 #include "ui/Window.h"
 #include "ui/IconFontDefines.h"
 #include "ui/CustomWidgets.h"
+#include "ui/UIScale.h"
 #include "render/Texture.h"
 #include "input/Input.h"
 #include "utility/Debug.h"
@@ -108,8 +109,9 @@ namespace nhahn
 	        }
 	        case WM_NCHITTEST:
 	        {
-	            // Expand the hit test area for resizing
-	            int borderWidth = 4; // Adjust this value to control the hit test area size
+	            // Expand the hit test area for resizing (scaled with the UI scale so the
+	            // grab region stays usable on high-DPI displays)
+	            int borderWidth = (int)(4.0f * UIScale::instance().value()); // hit test area size
 
 				if (!IsMaximized(hWnd))
 				{
@@ -207,6 +209,9 @@ namespace nhahn
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 		glfwWindowHint(GLFW_RESIZABLE, true);
+		// scale the initial window size by the monitor content scale so it stays
+		// proportionate on high-DPI displays (e.g. 1280x720 -> 1920x1080 at 150%)
+		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 	#ifdef _WIN32 // for custom titlebar
 		glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 	#endif
@@ -252,11 +257,16 @@ namespace nhahn
 
 		glEnable(GL_DEPTH_TEST);
 
-		// center window
+		// center window (use the actual window size, which GLFW_SCALE_TO_MONITOR may
+		// have scaled up on high-DPI displays) and sync it back to the Window object
+		int win_width, win_height;
+		glfwGetWindowSize(gl_Window, &win_width, &win_height);
+		window->_onResize(win_width, win_height);
+
 		int pm_xpos, pm_ypos, pm_width, pm_height;
 		GLFWmonitor* primary = glfwGetPrimaryMonitor();
 		glfwGetMonitorWorkarea(primary, &pm_xpos, &pm_ypos, &pm_width, &pm_height);
-		glfwSetWindowPos(gl_Window, pm_xpos + pm_width / 2 - window->getWidth() / 2, pm_ypos + pm_height / 2 - window->getHeight() / 2);
+		glfwSetWindowPos(gl_Window, pm_xpos + pm_width / 2 - win_width / 2, pm_ypos + pm_height / 2 - win_height / 2);
 
 		DBG("UI", DebugLevel::DEBUG, "OpenGL context created successfully\n");
 		return true;
@@ -348,6 +358,12 @@ namespace nhahn
 		bool ret = createLogoTexture(logo_path.c_str(), &_logo_id, &_logo_width, &_logo_height);
 		ASSERT(_logo_id, "Failed to create logo texture!");
 
+		// initialize the global UI scale from the monitor content scale (e.g. 1.5 for
+		// 150% Windows scaling). This scales fonts + style once the base style is set up.
+		float dpiScaleX = 1.0f, dpiScaleY = 1.0f;
+		glfwGetWindowContentScale((GLFWwindow*)_window->getNativeWindow(), &dpiScaleX, &dpiScaleY);
+		UIScale::instance().init(dpiScaleX);
+
 		DBG("UI", DebugLevel::DEBUG, "UI context created successfully\n");
 		return ret;
 	}
@@ -376,8 +392,9 @@ namespace nhahn
 
 		if (_window->hasCustomTitlebar())
 		{
-			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + 25.0f));
-			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - 25.0f));
+			const float titlebarHeight = 25.0f * UIScale::instance().value();
+			ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + titlebarHeight));
+			ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - titlebarHeight));
 			ImGui::SetNextWindowViewport(viewport->ID);
 		}
 		else
@@ -420,8 +437,11 @@ namespace nhahn
 			| ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollWithMouse;
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
+		const float s = UIScale::instance().value();
+		const float titlebarHeight = 25.0f * s;
+
 		ImGui::SetNextWindowPos(viewport->WorkPos);
-		ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, 25.0f });
+		ImGui::SetNextWindowSize(ImVec2{ viewport->WorkSize.x, titlebarHeight });
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -435,16 +455,17 @@ namespace nhahn
 		ImGui::PopStyleColor(1);
 
 		// app logo
-		ImGui::PaddedImage((void*)(intptr_t)_logo_id, ImVec2( 19,19 ), ImVec2( 3,3 ));
+		ImGui::PaddedImage((ImTextureID)_logo_id, ImVec2( 19*s, 19*s ), ImVec2( 3*s, 3*s ));
 
 		// app title
 		ImGui::SameLine();
-		ImGui::PaddedText(_window->getTitle().c_str(), ImVec2(0.0f, 5.0f), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
+		ImGui::PaddedText(_window->getTitle().c_str(), ImVec2(0.0f, 5.0f * s), ImVec4(1.0f, 0.628f, 0.311f, 1.0f));
 
 		// close, minimize & maximize buttons
-		float buttons_w = 75.0f;
+		float button_sz = 25.0f * s;
+		float buttons_w = 3.0f * button_sz;
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 5 });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0, 5 * s });
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{ 0.5f, 1.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
@@ -453,13 +474,13 @@ namespace nhahn
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - buttons_w);
-		if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(ICON_MDI_WINDOW_MINIMIZE, ImVec2{ button_sz, button_sz }))
 			switchMinimized();
 		ImGui::SameLine();
-		if (ImGui::Button(is_maximized ? ICON_MDI_WINDOW_RESTORE : ICON_MDI_WINDOW_MAXIMIZE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(is_maximized ? ICON_MDI_WINDOW_RESTORE : ICON_MDI_WINDOW_MAXIMIZE, ImVec2{ button_sz, button_sz }))
 			switchMaximize();
 		ImGui::SameLine();
-		if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, ImVec2{ 25, 25 }))
+		if (ImGui::Button(ICON_MDI_WINDOW_CLOSE, ImVec2{ button_sz, button_sz }))
 			_window->_onClose();
 
 		ImGui::PopStyleVar(5);
@@ -541,6 +562,8 @@ namespace nhahn
 		is_maximized = IsMaximized(native_win);
 	#endif
 
+		const double s = (double)UIScale::instance().value();
+
 		if (!is_maximized)
 		{
 			if (glfwGetMouseButton(window, 0) == GLFW_PRESS && _window_dragState == 0) {
@@ -553,16 +576,16 @@ namespace nhahn
 				int w_xpos, w_ypos;
 				glfwGetCursorPos(window, &c_xpos, &c_ypos);
 				glfwGetWindowPos(window, &w_xpos, &w_ypos);
-				if (_cursor_start_xpos >= 0 && _cursor_start_xpos <= ((double)_window_xsiz - 70) &&
-					_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25) {
+				if (_cursor_start_xpos >= 0 && _cursor_start_xpos <= ((double)_window_xsiz - 70 * s) &&
+					_cursor_start_ypos >= 0 && _cursor_start_ypos <= 25 * s) {
 
 					if (is_maximized)
 						glfwSetWindowPos(window, w_xpos + (int)(c_xpos - _cursor_start_xpos), w_ypos + (int)(c_ypos - _cursor_start_ypos));
 					else
 						glfwSetWindowPos(window, w_xpos + (int)(c_xpos - _cursor_start_xpos - 1), w_ypos + (int)(c_ypos - _cursor_start_ypos - 1));
 				}
-				if (_cursor_start_xpos >= ((double)_window_xsiz - 15) && _cursor_start_xpos <= ((double)_window_xsiz) &&
-					_cursor_start_ypos >= ((double)_window_ysiz - 15) && _cursor_start_ypos <= ((double)_window_ysiz)) {
+				if (_cursor_start_xpos >= ((double)_window_xsiz - 15 * s) && _cursor_start_xpos <= ((double)_window_xsiz) &&
+					_cursor_start_ypos >= ((double)_window_ysiz - 15 * s) && _cursor_start_ypos <= ((double)_window_ysiz)) {
 					glfwSetWindowSize(window, _window_xsiz + (int)(c_xpos - _cursor_start_xpos), _window_ysiz + (int)(c_ypos - _cursor_start_ypos));
 				}
 			}
