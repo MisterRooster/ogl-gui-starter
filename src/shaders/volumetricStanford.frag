@@ -31,14 +31,14 @@ void main()
 
 	vec2 U = vCoord * R;
 	U = 1.7* ( (U+U - R) / R.y);
-	FragColor0 -= FragColor0;
+	FragColor0 = vec4(0.);
 	M = (abs(M.x-.5f)>0.48f || abs(M.y-.5f)>0.48f) ? vec2(-time,.78) : -1.57*(2.*M*R-R)/R.y;
 
 	for (float i=-1.4; i<1.; i+=.3/16.) { // step .3 for Nyquist
 		vec3 P = vec3( U, i);
 		P.yz *= rot(M.y);
 		P.xz *= rot(M.x);
-		vec3 A = abs(P); if (max(A.x,max(A.y,A.z))>1.) continue; // optimization
+		vec3 A = abs(P); if (max(A.x,max(A.y,A.z))>=1.) continue; // optimization, also keeps scaled P strictly inside [0,32)
 		P = 16.*(P+1.);
 		
 		float V = softenEdges ? voxel( P.x , P.z , P.y ) : voxelB( P.x , P.z , P.y );
