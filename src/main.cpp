@@ -14,6 +14,7 @@
 #include "scene/SimpleCubeScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
+#include "ui/UIScale.h"
 #include "ui/IconFontDefines.h"
 #include "utility/Debug.h"
 #include "utility/FileSystem.h"
@@ -85,10 +86,15 @@ int main()
 		app.setRenderCallback(render, renderTickrate);
 		
 		// create ui
-		sceneView = std::make_unique<SceneView>(glm::uvec2(640, 320));
+		sceneView = std::make_unique<SceneView>();
 		propertyPanel = std::make_unique<PropertyPanel>();
 		propertyPanel->setSceneSwitchedCallback([](std::shared_ptr<Scene> scene) {
 			sceneView->setScene(scene);
+		});
+		// global display settings shown at the top of the property panel
+		propertyPanel->setDisplaySettingsCallback([]() {
+			UIScale::instance().drawControl();
+			sceneView->drawRenderSizeControl();
 		});
 
 		// default scene

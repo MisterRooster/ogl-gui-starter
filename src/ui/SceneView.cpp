@@ -10,6 +10,7 @@
 #include <imgui.h>
 
 #include "IconFontDefines.h"
+#include "ui/UIScale.h"
 #include "render/BufferObject.h"
 #include "scene/DefaultScene.h"
 #include "utility/FileSystem.h"
@@ -19,29 +20,71 @@
 
 namespace nhahn
 {
-    SceneView::SceneView(glm::uvec2 resolution)
-        : _screenResolution(resolution), _screenSize(400, 225)
-    {
-        std::string path = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
+    // Offscreen render-target presets selectable at runtime (see drawRenderSizeControl).
+    const SceneView::RenderPreset SceneView::_renderPresets[] = {
+        { "Low (960 x 540)",    glm::uvec2(960, 540)   },
+        { "Medium (1280 x 720)", glm::uvec2(1280, 720)  },
+        { "High (1920 x 1080)",  glm::uvec2(1920, 1080) }
+    };
+    const int SceneView::_renderPresetCount = (int)(sizeof(_renderPresets) / sizeof(_renderPresets[0]));
 
+    SceneView::SceneView()
+        : _screenResolution(_renderPresets[_renderPresetIndex].resolution), _screenSize(400, 225)
+    {
         // create new render target
         _rt = std::make_shared<RenderTarget>();
 
-        // create blank buffer object
-        BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)(_screenResolution.x * _screenResolution.y * sizeof(float)*4));
+        // create the offscreen texture we render the scene into
+        createScreenTexture(_renderPresets[_renderPresetIndex].resolution);
+
+        DBG("SceneView", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
+    }
+
+    void SceneView::createScreenTexture(glm::uvec2 resolution)
+    {
+        _screenResolution = resolution;
+        const size_t byteSize = (size_t)resolution.x * resolution.y * sizeof(float) * 4;
+
+        // blank buffer to clear the texture to black on (re)creation
+        BufferObject* blackPbo = new BufferObject(PIXEL_UNPACK_BUFFER, (GLsizei)byteSize);
         blackPbo->bind();
         blackPbo->map();
-        memset(blackPbo->data(), 0, _screenResolution.x * _screenResolution.y * sizeof(float) * 4);
+        memset(blackPbo->data(), 0, byteSize);
         blackPbo->unmap();
         blackPbo->unbind();
 
-        // create screen texture to render to
-        _screen = std::make_unique<Texture>(TEXTURE_2D, _screenResolution.x, _screenResolution.y);
+        // replace the screen texture (old one is released by the unique_ptr)
+        _screen = std::make_unique<Texture>(TEXTURE_2D, resolution.x, resolution.y);
         _screen->setFormat(TEXEL_FLOAT, 4, 4);
         _screen->init();
         _screen->copyPbo(*blackPbo);
 
-        DBG("SceneView", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
+        delete blackPbo;
+
+        DBG("SceneView", DebugLevel::DEBUG, "render target resized to %ux%u\n", resolution.x, resolution.y);
+    }
+
+    void SceneView::drawRenderSizeControl()
+    {
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextColored(ImVec4(1.0f, 0.628f, 0.311f, 1.0f), ICON_MDI_EYE " Render Size :");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(-1);
+        if (ImGui::BeginCombo("##render_size", _renderPresets[_renderPresetIndex].name))
+        {
+            for (int i = 0; i < _renderPresetCount; i++)
+            {
+                bool is_selected = (_renderPresetIndex == i);
+                if (ImGui::Selectable(_renderPresets[i].name, is_selected) && i != _renderPresetIndex)
+                {
+                    _renderPresetIndex = i;
+                    createScreenTexture(_renderPresets[i].resolution);
+                }
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
     }
 
     SceneView::~SceneView()
@@ -55,14 +98,16 @@ namespace nhahn
     {
         _currentFPS = (int)std::round(1.0 / dt);
 
+        const float s = UIScale::instance().value();
+
         // scene Window
         ImGuiWindowFlags screenflags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f * s, 2.0f * s));
 
         // set initial window size on first use
-        ImGui::SetNextWindowSize(ImVec2((float)_screenSize.x, (float)_screenSize.y), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(400.0f * s, 225.0f * s), ImGuiCond_FirstUseEver);
         ImGui::Begin(ICON_MDI_EYE " Scene View", nullptr, screenflags);
         ImGui::PopStyleVar(3);
 
@@ -89,7 +134,7 @@ namespace nhahn
 
         // add rendered texture to ImGUI scene window
         uint64_t textureID = _screen->glName();
-        ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{ (float)_screenSize.x, (float)_screenSize.y }, ImVec2{0,1}, ImVec2{1,0});
+        ImGui::Image((ImTextureID)textureID, ImVec2{ (float)_screenSize.x, (float)_screenSize.y }, ImVec2{0,1}, ImVec2{1,0});
         if (ImGui::IsItemHovered())
             ImGui::SetMouseCursor(7);
 
@@ -101,11 +146,11 @@ namespace nhahn
             ImVec2 labelSize = ImGui::CalcTextSize(statsLabel);
 
             ImGuiWindowFlags statsInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
-                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoSavedSettings
                 | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
 
-            const float statsInfo_margin = 10.0f;
-            const ImVec2 statsInfo_pad = ImVec2(10.0f, 4.0f);
+            const float statsInfo_margin = 10.0f * s;
+            const ImVec2 statsInfo_pad = ImVec2(10.0f * s, 4.0f * s);
 
             ImVec2 statsInfo_size = ImVec2(labelSize.x + statsInfo_pad.x * 2, labelSize.y + statsInfo_pad.y * 2);
 
@@ -118,10 +163,10 @@ namespace nhahn
             statsInfo_flags |= ImGuiWindowFlags_NoMove;
 
             ImGui::SetNextWindowBgAlpha(0.15f); // Transparent background
-            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f * s);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, statsInfo_pad);
 
-            if (ImGui::BeginChild("StatsInfo", statsInfo_size, true, statsInfo_flags))
+            if (ImGui::BeginChild("StatsInfo", statsInfo_size, ImGuiChildFlags_Borders, statsInfo_flags))
             {
                 ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), statsLabel);
             }

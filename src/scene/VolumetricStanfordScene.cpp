@@ -60,7 +60,7 @@ namespace nhahn
             ImVec2 labelSize1 = ImGui::CalcTextSize(inputlabel1);
 
             ImGuiWindowFlags inputInfo_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking
-                | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings
+                | ImGuiWindowFlags_NoSavedSettings
                 | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
 
             const float inputInfo_margin = 10.0f;
@@ -80,7 +80,7 @@ namespace nhahn
 
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, inputInfo_pad);
-            if (ImGui::BeginChild("InputInfo", inputInfo_size, true, inputInfo_flags))
+            if (ImGui::BeginChild("InputInfo", inputInfo_size, ImGuiChildFlags_Borders, inputInfo_flags))
             {
                 ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), inputlabel1);
             }
