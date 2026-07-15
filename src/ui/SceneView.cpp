@@ -29,7 +29,10 @@ namespace nhahn
     const int SceneView::_renderPresetCount = (int)(sizeof(_renderPresets) / sizeof(_renderPresets[0]));
 
     SceneView::SceneView()
-        : _screenResolution(_renderPresets[_renderPresetIndex].resolution), _screenSize(400, 225)
+        // NB: use the constant, not _renderPresetIndex: members are initialized in
+        // declaration order and _renderPresetIndex is declared after _screenResolution,
+        // so it is not yet initialized at this point.
+        : _screenResolution(_renderPresets[_defaultRenderPreset].resolution), _screenSize(400, 225)
     {
         // create new render target
         _rt = std::make_shared<RenderTarget>();

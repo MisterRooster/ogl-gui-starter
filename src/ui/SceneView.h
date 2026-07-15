@@ -53,7 +53,8 @@ namespace nhahn
 
         static const RenderPreset _renderPresets[];
         static const int _renderPresetCount;
-        int _renderPresetIndex = 1; // default: Medium
+        static constexpr int _defaultRenderPreset = 1; // Medium
+        int _renderPresetIndex = _defaultRenderPreset;
 
         int _currentFPS = 0;
         bool _showFPSOverlay = true;
