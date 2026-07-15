@@ -34,10 +34,7 @@ namespace nhahn
         // so it is not yet initialized at this point.
         : _screenResolution(_renderPresets[_defaultRenderPreset].resolution), _screenSize(400, 225)
     {
-        // create new render target
-        _rt = std::make_shared<RenderTarget>();
-
-        // create the offscreen texture we render the scene into
+        // create the offscreen render target + texture we render the scene into
         createScreenTexture(_renderPresets[_renderPresetIndex].resolution);
 
         DBG("SceneView", DebugLevel::DEBUG, "Texture memory usage: %dmb\n", (int)(Texture::memoryUsage() / (1024 * 1024)));
@@ -46,6 +43,12 @@ namespace nhahn
     void SceneView::createScreenTexture(glm::uvec2 resolution)
     {
         _screenResolution = resolution;
+
+        // Rebuild the render target too. It caches raw pointers to its attached
+        // textures, so reusing it after the old screen texture is destroyed below
+        // would leave a dangling pointer (dereferenced by the next attachTextureAny()).
+        _rt = std::make_shared<RenderTarget>();
+
         const size_t byteSize = (size_t)resolution.x * resolution.y * sizeof(float) * 4;
 
         // blank buffer to clear the texture to black on (re)creation
