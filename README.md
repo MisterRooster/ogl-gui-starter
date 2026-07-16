@@ -75,5 +75,5 @@ The following resources are used:
 - src/shaders/**endlessCreature.frag** → Altered shader based on Weird endless living creature made by [@ponk](https://www.shadertoy.com/user/ponk) on [Shadertoy](https://www.shadertoy.com/)<br>
 [https://www.shadertoy.com/view/tljXWy](https://www.shadertoy.com/view/tljXWy)
 -----
-Copyright (c) 2022 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
+Copyright (c) 2022-2026 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
 Licensed under the MIT license. See [LICENSE](LICENSE) for full terms.

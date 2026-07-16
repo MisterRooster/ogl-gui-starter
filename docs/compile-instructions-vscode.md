@@ -42,5 +42,5 @@ code .
 The compiled executables can be found in the project *bin/BuildType* folders.
 
 -----
-Copyright (c) 2022 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
+Copyright (c) 2022-2026 MisterRooster ([github.com/MisterRooster](https://github.com/MisterRooster)). All rights reserved.  
 Licensed under the MIT license. See [LICENSE](LICENSE) for full terms.
