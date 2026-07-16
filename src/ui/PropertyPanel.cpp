@@ -11,7 +11,7 @@
 #include "scene/Scene.h"
 #include "ui/IconFontDefines.h"
 #include "ui/CustomWidgets.h"
-#include "utility/Debug.h";
+#include "utility/Debug.h"
 
 
 namespace nhahn
