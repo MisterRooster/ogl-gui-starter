@@ -24,6 +24,10 @@ cmake --build build --config Debug     # or --config Release
 
 There is no test suite for this project (the `dependencies/*` folders contain the upstream libraries' own tests, which are disabled in this build).
 
+## Commit
+
+Do not add a co-author text to the commits.
+
 ## Architecture
 
 All application code lives under `src/` in `namespace nhahn`.
