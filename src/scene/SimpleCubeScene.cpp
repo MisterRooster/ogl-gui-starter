@@ -23,7 +23,7 @@ namespace nhahn
 	void SimpleCubeScene::initializeScene()
 	{
 		std::string shaderPath = nhahn::FileSystem::getModuleDirectory() + "data\\shaders\\";
-		_phongShadingProg = std::make_unique<Shader>(shaderPath.c_str(), "common.inc", "basicMVP.vert", nullptr, "phongShading.frag", 1);
+		_phongShadingProg = std::make_unique<Shader>(shaderPath.c_str(), "common.inc", "basicMVP.vert", nullptr, "simpleCube.frag", 1);
 
 		float vertices[] = {
 			 // front
