@@ -5,6 +5,7 @@
 This project is a small OpenGL application using GLFW3 with imgui embedded as graphical user interface.
 It's purpose is to be used as a basis to quickly prototyping and implementing OpenGL scenarios or as a starting point for your own gui OpenGL application.
 Same useful helper classes for rendering, file reading/writing etc. are provided.
+The project has some converted shadertoy scenes included, with added adjustable properties.
 
 > **Note**:
 Support for OpenGL 4.4 core profile is required.
@@ -17,15 +18,14 @@ Clone the repo:
 git clone git://github.com/MisterRooster/ogl-gui-starter.git
 ```
 
-Then simply run CMake with your favourite IDE. Tested with Visual Studio 2022,
+Then simply run CMake with your favourite IDE. Tested with Visual Studio 2022 & GCC 16.1.0 with MinGW,
 no working guarantee for other environments.
 Example commands for VS 2022:
 
 ```bash
 cd ogl-gui-starter 
 mkdir build
-cd build
-cmake -G "Visual Studio 17"..
+cmake -G "Visual Studio 17" -B build
 ```
 
 If you are using **Visual Studio Code**, checkout [How to compile with VS Code](docs/compile-instructions-vscode.md).
