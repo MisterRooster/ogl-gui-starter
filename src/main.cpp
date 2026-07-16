@@ -12,6 +12,10 @@
 #include "scene/DefaultScene.h"
 #include "scene/VolumetricStanfordScene.h"
 #include "scene/SimpleCubeScene.h"
+#include "scene/UnimaginedScene.h"
+#include "scene/SquareBackgroundScene.h"
+#include "scene/LightningStormScene.h"
+#include "scene/EndlessCreatureScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "ui/UIScale.h"
@@ -31,6 +35,10 @@ namespace nhahn
 	std::shared_ptr<Scene> defaultScene = nullptr;
 	std::shared_ptr<Scene> raymarchScene = nullptr;
 	std::shared_ptr<Scene> simpleCubeScene = nullptr;
+	std::shared_ptr<Scene> unimaginedScene = nullptr;
+	std::shared_ptr<Scene> squareBackgroundScene = nullptr;
+	std::shared_ptr<Scene> lightningStormScene = nullptr;
+	std::shared_ptr<Scene> endlessCreatureScene = nullptr;
 
 	void splitDockspace()
 	{
@@ -105,9 +113,21 @@ int main()
 		simpleCubeScene = SceneManager::createScene<SimpleCubeScene>("simpleCube");
 		propertyPanel->addScene(simpleCubeScene->getName(), simpleCubeScene);
 
-		// volumetric example scene
+		// shadertoy example scenes
 		raymarchScene = SceneManager::createScene<VolumetricStanfordScene>("VolumetricBunny");
 		propertyPanel->addScene(raymarchScene->getName(), raymarchScene);
+
+		unimaginedScene = SceneManager::createScene<UnimaginedScene>("Unimagined");
+		propertyPanel->addScene(unimaginedScene->getName(), unimaginedScene);
+
+		squareBackgroundScene = SceneManager::createScene<SquareBackgroundScene>("SquareBackground");
+		propertyPanel->addScene(squareBackgroundScene->getName(), squareBackgroundScene);
+
+		lightningStormScene = SceneManager::createScene<LightningStormScene>("LightningStorm");
+		propertyPanel->addScene(lightningStormScene->getName(), lightningStormScene);
+
+		endlessCreatureScene = SceneManager::createScene<EndlessCreatureScene>("EndlessCreature");
+		propertyPanel->addScene(endlessCreatureScene->getName(), endlessCreatureScene);
 
 		// -> CREATE YOUR CUSTOM SCENES HERE
 
