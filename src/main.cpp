@@ -16,6 +16,7 @@
 #include "scene/SquareBackgroundScene.h"
 #include "scene/LightningStormScene.h"
 #include "scene/EndlessCreatureScene.h"
+#include "scene/GildedPlumesScene.h"
 #include "ui/SceneView.h"
 #include "ui/PropertyPanel.h"
 #include "ui/UIScale.h"
@@ -39,6 +40,7 @@ namespace nhahn
 	std::shared_ptr<Scene> squareBackgroundScene = nullptr;
 	std::shared_ptr<Scene> lightningStormScene = nullptr;
 	std::shared_ptr<Scene> endlessCreatureScene = nullptr;
+	std::shared_ptr<Scene> gildedPlumesScene = nullptr;
 
 	void splitDockspace()
 	{
@@ -128,6 +130,9 @@ int main()
 
 		endlessCreatureScene = SceneManager::createScene<EndlessCreatureScene>("EndlessCreature");
 		propertyPanel->addScene(endlessCreatureScene->getName(), endlessCreatureScene);
+
+		gildedPlumesScene = SceneManager::createScene<GildedPlumesScene>("GildedPlumes");
+		propertyPanel->addScene(gildedPlumesScene->getName(), gildedPlumesScene);
 
 		// -> CREATE YOUR CUSTOM SCENES HERE
 
